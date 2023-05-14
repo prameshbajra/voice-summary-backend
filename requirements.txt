@@ -1,0 +1,4 @@
+aiofiles
+fastapi
+openai-whisper
+uvicorn[standard]
