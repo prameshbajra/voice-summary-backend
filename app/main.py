@@ -1,5 +1,6 @@
 import os
 import time
+import boto3
 import openai
 import whisper
 import aiofiles
@@ -11,7 +12,11 @@ model = whisper.load_model("base")
 end = time.time()
 print("Whisper Model load time: ", end - start)
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+session = boto3.session.Session()
+client = session.client(service_name='secretsmanager', region_name='us-east-1')
+
+openai.api_key = client.get_secret_value(
+    SecretId='OPENAI_API_KEY')['SecretString']
 
 
 @app.get("/heartbeat")
