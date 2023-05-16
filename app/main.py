@@ -19,6 +19,11 @@ openai.api_key = client.get_secret_value(
     SecretId='OPENAI_API_KEY')['SecretString']
 
 
+@app.get("/")
+async def root():
+    return {"message": "Alive and well !!"}
+
+
 @app.get("/heartbeat")
 async def root():
     return {"message": "Beating fine !!"}
