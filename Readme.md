@@ -23,7 +23,7 @@ You will not need to upload this image to ECR to run it in lambda
 
 If not already created, create a ECR repo
 ```
-aws ecr create-repository --repository-name voice-summary-ecr-repository --image-scanning-configuration scanOnPush=true --image-tag-mutability MUTABLE
+aws ecr create-repository --repository-name voice-summary-ecr-repository --region us-east-1 --image-scanning-configuration scanOnPush=true --image-tag-mutability MUTABLE
 ```
 
 Then get credentials
@@ -40,3 +40,5 @@ Now, push the image
 ```
 docker push 967661707579.dkr.ecr.us-east-1.amazonaws.com/voice-summary-ecr-repository:latest
 ```
+
+

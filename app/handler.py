@@ -4,7 +4,7 @@ import openai
 import whisper
 
 start = time.time()
-model = whisper.load_model("base")
+model = whisper.load_model("base", download_root='/tmp/')
 end = time.time()
 print("Whisper Model load time: ", end - start)
 
