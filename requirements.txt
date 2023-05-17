@@ -1,7 +1,0 @@
-aiofiles
-boto3
-fastapi
-openai
-openai-whisper
-python-multipart
-uvicorn[standard]
