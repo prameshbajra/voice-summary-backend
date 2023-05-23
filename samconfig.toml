@@ -1,0 +1,12 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "voice-summary-stack"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-w8dj7btx59k2"
+s3_prefix = "voice-summary-stack"
+region = "ap-south-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "S3BucketName=\"voice-summary-bucket\" PresignedUrlExpirationDurationSeconds=\"3600\""
+image_repositories = []

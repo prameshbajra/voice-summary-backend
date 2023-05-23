@@ -1,0 +1,77 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Serverless S3 Uploader - upload files to S3 buckets from your web applications using pre-signed URLs.
+
+Globals:
+  Api:
+    EndpointConfiguration: EDGE      
+    Cors:
+      AllowMethods: "'OPTIONS,GET'"
+      AllowHeaders: "'Content-Type'"
+      AllowOrigin: "'*'" 
+  Function:
+    Timeout: 300
+
+Parameters:
+  S3BucketName:
+    Type: String
+    Description: S3 bucket name
+    Default: "voice-summary-bucket"
+  PresignedUrlExpirationDurationSeconds:
+    Type: Number
+    Description: Expiration time for pre-signed URLs in seconds
+    Default: 3600
+
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref S3BucketName
+      CorsConfiguration:
+        CorsRules:
+        - AllowedHeaders:
+            - "*"
+          AllowedMethods:
+            - GET
+            - PUT
+            - POST
+            - DELETE
+            - HEAD
+          AllowedOrigins:
+            - "*"
+
+  S3UploaderFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: s3-uploader/
+      Handler: app.handler
+      Runtime: python3.9
+      MemorySize: 128
+      Architectures:
+        - arm64
+      Environment:
+        Variables:
+          S3_BUCKET: !Ref S3Bucket
+          PRESIGNED_URL_EXPIRATION_DURATION_SECONDS: !Ref PresignedUrlExpirationDurationSeconds
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref S3Bucket
+      Events:
+        HttpPost:
+          Type: Api
+          Properties:
+            Path: '/generate-presigned-url'
+            Method: get
+
+
+
+Outputs:
+  S3BucketName:
+    Description: S3 bucket
+    Value: !Ref S3Bucket
+  S3UploaderFunction:
+    Description: "S3 Uploader Function ARN"
+    Value: !GetAtt S3UploaderFunction.Arn
+  S3UploaderFunctionIamRole:
+    Description: "Implicit IAM Role created for function"
+    Value: !GetAtt S3UploaderFunctionRole.Arn
