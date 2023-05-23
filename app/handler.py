@@ -2,10 +2,10 @@ import os
 import time
 import boto3
 import openai
-import whisper
+import whisperx
 
 start = time.time()
-model = whisper.load_model("base", download_root='/tmp/')
+model = whisperx.load_model("base", download_root='/tmp/')
 end = time.time()
 print("Whisper Model load time: ", end - start)
 
@@ -15,6 +15,10 @@ client = session.client(service_name='secretsmanager', region_name='us-east-1')
 
 openai.api_key = client.get_secret_value(
     SecretId='OPENAI_API_KEY')['SecretString']
+
+device = "cpu" 
+batch_size = 1
+compute_type = "int8" 
 
 
 def handler(event, context):
@@ -29,7 +33,9 @@ def handler(event, context):
     s3_client.download_file(bucket, key, download_path)
     print("Done downloading. :D")
     start = time.time()
-    result = model.transcribe(download_path)
+    audio = whisperx.load_audio(download_path)
+    result = model.transcribe(audio, batch_size=batch_size)
+    print(result["segments"]) # before alignment
     end = time.time()
     print("Time taken to transcribe: ", end - start)
     print("Result: ", result)
