@@ -2,8 +2,8 @@ import os
 import json
 import boto3
 
-PRESIGNED_URL_EXPIRATION_DURATION_SECONDS = int(os.environ.get(
-    'PRESIGNED_URL_EXPIRATION_DURATION_SECONDS', '3600')) 
+PRESIGNED_URL_EXPIRATION_DURATION_SECONDS = int(
+    os.environ.get('PRESIGNED_URL_EXPIRATION_DURATION_SECONDS', '3600'))
 S3_BUCKET = os.environ.get('S3_BUCKET')
 
 
@@ -24,4 +24,4 @@ def handler(event, context):
             'body': json.dumps('Query parameter not available.')
         }
 
-    return {'statusCode': 200, 'body': json.dumps(response)}
+    return {'statusCode': 200, 'body': json.dumps({'url': response})}
