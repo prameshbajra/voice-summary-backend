@@ -6,6 +6,7 @@ codeuri = "/Users/prameshbajracharya/lecodage/personalworks/voice-summary-backen
 runtime = "python3.9"
 architecture = "arm64"
 handler = "app.handler"
+source_hash = "c92c16f9f53f62cae6f0023bdc434d23769f75d1ee08cfd937f645585a2124dd"
 manifest_hash = ""
 packagetype = "Zip"
 functions = ["S3UploaderFunction"]

@@ -15,7 +15,7 @@ print("Whisper Model load time: ", end - start)
 
 session = boto3.session.Session()
 s3_client = boto3.client('s3')
-client = session.client(service_name='secretsmanager', region_name='us-east-1')
+client = session.client(service_name='secretsmanager', region_name='ap-south-1')
 batch_size = 4
 
 openai.api_key = client.get_secret_value(

@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Serverless S3 Uploader - upload files to S3 buckets from your web applications using pre-signed URLs.
+Description: Voice Summary Backend for generating voice summaries from audio files
 
 Globals:
   Api:
@@ -21,8 +21,13 @@ Parameters:
     Type: Number
     Description: Expiration time for pre-signed URLs in seconds
     Default: 3600
+  ECRRepositoryName:
+    Type: String
+    Description: Name of the ECR Repository
+    Default: "voice-summary-ecr-repository"
 
 Resources:
+  # S3 Buckets ...
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -40,6 +45,7 @@ Resources:
           AllowedOrigins:
             - "*"
 
+  # Lambda Functions ...
   S3UploaderFunction:
     Type: AWS::Serverless::Function 
     Properties:
@@ -47,6 +53,7 @@ Resources:
       Handler: app.handler
       Runtime: python3.9
       MemorySize: 128
+      Timeout: 30
       Architectures:
         - arm64
       Environment:
@@ -63,6 +70,21 @@ Resources:
             Path: '/generate-presigned-url'
             Method: get
 
+  TranscribeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageUri: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECRRepositoryName}:latest'
+      MemorySize: 6144
+      Timeout: 900
+      Architectures:
+        - arm64
+      Events:
+        S3Event:
+          Type: S3
+          Properties:
+            Bucket: !Ref S3Bucket
+            Events: s3:ObjectCreated:*
 
 
 Outputs:
@@ -75,3 +97,9 @@ Outputs:
   S3UploaderFunctionIamRole:
     Description: "Implicit IAM Role created for function"
     Value: !GetAtt S3UploaderFunctionRole.Arn
+  TranscribeFunction:
+    Description: "Transcribe Function ARN"
+    Value: !GetAtt TranscribeFunction.Arn
+  TranscribeFunctionIamRole:
+    Description: "Implicit IAM Role created for function"
+    Value: !GetAtt TranscribeFunctionRole.Arn
