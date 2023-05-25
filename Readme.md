@@ -7,7 +7,7 @@ Make sure you have these things first:
 
 After which you can simply,
 
-Run `chmod +x deploy.sh` before you start.
+Run `chmod +x deploy.sh` before you start. You only need to run this once.
 Then run `./deploy.sh`. Done !!
 
 
