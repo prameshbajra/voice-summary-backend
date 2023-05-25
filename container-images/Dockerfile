@@ -1,5 +1,7 @@
 FROM public.ecr.aws/lambda/python:3.10-arm64
 
+ENV TRANSFORMERS_CACHE=/tmp/transformers_cache
+
 RUN yum -y update && \
     yum -y install tar gzip xz && \
     yum clean all && \
@@ -13,7 +15,7 @@ RUN curl https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-arm64-static.t
 COPY requirements.txt  .
 RUN pip3 install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
 
-RUN yum -y install git gcc \
+RUN yum -y install git gcc libsndfile \
     && yum clean all \
     && rm -rf /var/cache/yum    
 
