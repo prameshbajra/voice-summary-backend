@@ -1,25 +1,20 @@
 import os
 import time
 import boto3
-import openai
 from whisperx import load_model, load_audio
 
 start = time.time()
 model = load_model("base",
-                            device="cpu",
-                            compute_type="int8",
-                            language="en",
-                            download_root='/tmp/')
+                   device="cpu",
+                   compute_type="int8",
+                   language="en",
+                   download_root='/tmp/')
 end = time.time()
 print("Whisper Model load time: ", end - start)
 
 session = boto3.session.Session()
 s3_client = boto3.client('s3')
-client = session.client(service_name='secretsmanager', region_name='ap-south-1')
 batch_size = 4
-
-openai.api_key = client.get_secret_value(
-    SecretId='OPENAI_API_KEY')['SecretString']
 
 
 def handler(event, context):

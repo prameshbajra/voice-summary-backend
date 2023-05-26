@@ -79,6 +79,9 @@ Resources:
       Timeout: 900
       Architectures:
         - arm64
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Sub "${S3BucketName}*"
       Events:
         S3Event:
           Type: S3
