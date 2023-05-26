@@ -1,9 +1,11 @@
 FROM public.ecr.aws/lambda/python:3.10-arm64
 
 ENV TRANSFORMERS_CACHE=/tmp/transformers_cache
+ENV MPLCONFIGDIR=/tmp/mpl
+ENV TORCH_HOME=/tmp/torch
 
 RUN yum -y update && \
-    yum -y install tar gzip xz && \
+    yum -y install tar gzip xz git gcc libsndfile && \
     yum clean all && \
     rm -rf /var/cache/yum
 
@@ -14,10 +16,6 @@ RUN curl https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-arm64-static.t
 
 COPY container-images/requirements.txt  .
 RUN pip3 install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
-
-RUN yum -y install git gcc libsndfile \
-    && yum clean all \
-    && rm -rf /var/cache/yum    
 
 # RUN pip3 install git+https://github.com/m-bain/whisperx.git
 RUN pip3 install git+https://github.com/prsnnami/whisperX.git

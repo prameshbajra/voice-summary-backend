@@ -2,10 +2,10 @@ import os
 import time
 import boto3
 import openai
-import whisperx
+from whisperx import load_model, load_audio
 
 start = time.time()
-model = whisperx.load_model("base",
+model = load_model("base",
                             device="cpu",
                             compute_type="int8",
                             language="en",
@@ -35,7 +35,7 @@ def handler(event, context):
     print("Done downloading. :D")
     start = time.time()
 
-    audio = whisperx.load_audio(download_path)
+    audio = load_audio(download_path)
     print(f"Audio Loaded: {time.time() - start}")
     result = model.transcribe(audio, batch_size=batch_size)
     print(f"Transcribed: {time.time() - start}")
