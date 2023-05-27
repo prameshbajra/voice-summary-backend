@@ -17,8 +17,7 @@ RUN curl https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-arm64-static.t
 COPY container-images/requirements.txt  .
 RUN pip3 install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
 
-# RUN pip3 install git+https://github.com/m-bain/whisperx.git
-RUN pip3 install git+https://github.com/prameshbajra/whisperX.git
+RUN pip3 install git+https://github.com/m-bain/whisperx.git
 
 
 # Copy function code
