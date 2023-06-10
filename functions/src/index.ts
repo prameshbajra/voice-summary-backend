@@ -80,7 +80,7 @@ exports.onmemoupdate = functions
       chunkSize: 10000,
       chunkOverlap: 500,
     });
-    const docs = textSplitter.createDocuments([transcriptText]);
+    const docs = await textSplitter.createDocuments([transcriptText]);
 
     const mapPromptTemplate = new PromptTemplate({
       template: `
@@ -108,11 +108,13 @@ exports.onmemoupdate = functions
       combinePrompt: combinePromptTemplate,
     });
 
-    const result: ChainValues = await chain.call(docs);
+    const result: ChainValues = await chain.call({
+      input_documents: docs,
+    });
 
     console.log({ result });
 
-    const parsed = await parser.parse(String(result));
+    const parsed = await parser.parse(result.text);
 
     console.log({ parsed });
 
