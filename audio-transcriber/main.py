@@ -1,10 +1,14 @@
 import os
 import time
+import datetime
+from functools import reduce
 import firebase_admin
 from firebase_admin import firestore
 from firebase_admin import storage
 from flask import Flask, request
 from whisperx import load_model, load_audio
+import threading
+import psutil
 
 bucket_name = 'voice-summary-app-eba91.appspot.com'
 
@@ -18,14 +22,35 @@ start = time.time()
 model = load_model("base",
                    device="cpu",
                    compute_type="int8",
-                   language="en",
-                   download_root='/tmp/')
+                   language="en")
 end = time.time()
 print("Whisper Model load time: ", end - start)
 batch_size = 16
 
+# Global variables to store the max CPU and memory usage
+max_cpu = 0
+max_mem = 0
+
+def profile():
+    global max_cpu
+    global max_mem
+    while True:
+        cpu = psutil.cpu_percent()
+        mem = psutil.virtual_memory().percent
+        max_cpu = max(max_cpu, cpu)
+        max_mem = max(max_mem, mem)
+        time.sleep(0.1)
+
 @app.route("/", methods=['GET'])
 def transcribe_audio():
+    global max_cpu
+    global max_mem
+    max_cpu = 0
+    max_mem = 0
+
+    profiling_thread = threading.Thread(target=profile)
+    profiling_thread.start()
+
     memo_id = request.args.get('memoId')
 
     if not memo_id:
@@ -49,16 +74,35 @@ def transcribe_audio():
         result = model.transcribe(audio, batch_size=batch_size)
         print(f"Transcribed: {time.time() - start}")
 
+        transcription_reducer = lambda transcript: reduce(lambda acc, segment: acc + segment['text'] + " ", [segment for segment in transcript['segments']], "")
+        transcript_text = transcription_reducer(result)
+        print("Result: ", result)
+        print("Reduced Result: ", transcript_text)
+
+        updated_time = int(datetime.datetime.now().timestamp() * 1000)
+
         memo_ref.update({
-            u'transcript': result
+            u'transcript': transcript_text,
+            u'updatedDate': updated_time
         })
 
-        print("Result: ", result)
 
-    except:
+    except Exception as e:
         print(u'No such document!')
+        print(f'Error with document {memo_id}: {str(e)}')
 
-    return f"Hello {name}!"
+    profiling_thread.do_run = False
+    profiling_thread.join()
+
+    print(f"Max CPU usage: {max_cpu}%")
+    print(f"Max memory usage: {max_mem}%")
+
+    memo_ref.update({
+        u'cpuUsage': max_cpu,
+        u'memoryUsage': max_mem
+    })
+
+    return f"Success"
 
 
 if __name__ == "__main__":

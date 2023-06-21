@@ -53,17 +53,14 @@ exports.onmemoupdate = functions
     }
 
     const { transcript } = newValue;
-    const transcriptText = transcript.segments.reduce(
-      (acc: string, segment: { text: string }) => acc + segment.text + " ",
-      ""
-    );
+
     const parser = StructuredOutputParser.fromZodSchema(
       z.object({
         summary: z.string().describe("summary of the typescript"),
         tags: z
           .array(z.string())
           .describe(
-            "list of entities in the transcript, entities include objects of interest in the transcript. Entities are most usually nouns."
+            "list of entities in the transcript, entities include at most 5 objects of the most interest in the transcript. Entities are most usually nouns."
           ),
       })
     );
@@ -80,7 +77,7 @@ exports.onmemoupdate = functions
       chunkSize: 10000,
       chunkOverlap: 500,
     });
-    const docs = await textSplitter.createDocuments([transcriptText]);
+    const docs = await textSplitter.createDocuments([transcript]);
 
     const mapPromptTemplate = new PromptTemplate({
       template: `
