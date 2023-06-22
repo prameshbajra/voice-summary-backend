@@ -2,6 +2,7 @@ import os
 import time
 import datetime
 from functools import reduce
+import base64
 import firebase_admin
 from firebase_admin import firestore
 from firebase_admin import storage
@@ -41,7 +42,7 @@ def profile():
         max_mem = max(max_mem, mem)
         time.sleep(0.1)
 
-@app.route("/", methods=['GET'])
+@app.route("/", methods=['POST'])
 def transcribe_audio():
     global max_cpu
     global max_mem
@@ -51,7 +52,15 @@ def transcribe_audio():
     profiling_thread = threading.Thread(target=profile)
     profiling_thread.start()
 
-    memo_id = request.args.get('memoId')
+    message = request.get_json().get('message', {})
+    if not message:
+        return "Invalid Pub/Sub message", 400
+
+    data = message.get('memoId')
+    if not data:
+        return "No data in Pub/Sub message", 400
+
+    memo_id = base64.b64decode(data).decode("utf-8")
 
     if not memo_id:
         return "No memoId provided", 400
@@ -61,7 +70,12 @@ def transcribe_audio():
     try:
         doc = memo_ref.get()
         print(u'Document data: {}'.format(doc.to_dict()))
-        audio_src = doc.to_dict()['audioSrc']
+        doc_data = doc.to_dict()
+
+        if 'transcript' in doc.doc_data:
+            return f"Already Processed"
+        
+        audio_src = doc_data['audioSrc']
 
         download_path = os.path.join('/tmp', os.path.basename(audio_src))
         blob = bucket.blob(audio_src)
