@@ -1,5 +1,6 @@
 // import { logger } from "firebase-functions";
 import * as functions from "firebase-functions";
+import * as admin from "firebase-admin";
 
 // The Firebase Admin SDK to access Firestore.
 import { initializeApp } from "firebase-admin/app";
@@ -11,14 +12,14 @@ import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { StructuredOutputParser } from "langchain/output_parsers";
 import { ChainValues } from "langchain/dist/schema";
 
-const CLOUD_RUN_URL = "https://audio-transcriber-oszwyfzita-el.a.run.app/";
+const TOPIC_NAME = "transcription-jobs";
 
 initializeApp();
 
 exports.onmemocreate = functions
   .region("asia-east2")
   .firestore.document("memos/{memoId}")
-  .onCreate((snap, context) => {
+  .onCreate(async (snap, context) => {
     const { memoId } = context.params;
 
     const snapshot = snap.data();
@@ -28,8 +29,13 @@ exports.onmemocreate = functions
     }
 
     try {
-      console.log("triggering cloud run");
-      fetch(CLOUD_RUN_URL + `?memoId=${memoId}`);
+      console.log("triggering pubsub");
+      const messageId = await admin.messaging().sendToTopic(TOPIC_NAME, {
+        data: {
+          memoId,
+        },
+      });
+      console.log(`Message ${messageId} published.`);
     } catch (e) {
       console.error("Error in cloud run ", e);
     }
