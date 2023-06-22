@@ -177,3 +177,6 @@ pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python
 .aws-sam/build.toml
+
+*/firebase.config.js
+*/node_modules
