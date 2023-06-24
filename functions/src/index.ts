@@ -12,7 +12,7 @@ import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { StructuredOutputParser } from "langchain/output_parsers";
 import { ChainValues } from "langchain/dist/schema";
 
-const TOPIC_NAME = "transcription-jobs";
+const TOPIC_NAME = "projects/voice-summary-app-eba91/topics/transcription-jobs";
 
 initializeApp();
 
